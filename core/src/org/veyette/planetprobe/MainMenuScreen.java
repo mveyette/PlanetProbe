@@ -29,7 +29,7 @@ public class MainMenuScreen implements Screen{
         game.batch.begin();
         game.font.draw(game.batch, "Welcome to Planet Probe!!! ", 100, 150);
         game.font.draw(game.batch, "Tap anywhere to begin!", 100, 100);
-        game.bigfont.draw(game.batch, "DEMO", 10, game.screenHeight-10);
+        game.bigfont.draw(game.batch, "DEMO", 5, game.screenHeight-10);
         game.batch.end();
 
         if (Gdx.input.isTouched()) {

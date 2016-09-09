@@ -371,7 +371,7 @@ public class GameScreen implements Screen {
         game.batch.begin();
         //font.draw(batch, probeString, 10, screenHeight-10);
         game.font.draw(game.batch, planetString, game.screenWidth-100, game.screenHeight-10, 100, Align.left, false);
-        game.bigfont.draw(game.batch, "DEMO", 10, game.screenHeight-10);
+        game.bigfont.draw(game.batch, "DEMO", 5, game.screenHeight-10);
         ship.draw(game.batch);
         for(Probe probe: probes) {
             probe.sprite.draw(game.batch);
