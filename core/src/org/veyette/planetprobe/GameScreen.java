@@ -24,6 +24,8 @@ public class GameScreen implements Screen {
     private OrthographicCamera camera;
     private Texture shipImage;
     private Texture probeImage;
+    private Texture starImage;
+    private Texture planet_jupiterImage;
     private Sprite ship;
     private Array<Probe> probes;
     private Star star;
@@ -55,6 +57,12 @@ public class GameScreen implements Screen {
     private String probeString = "";
     private String planetString = "";
     private float deltaTime;
+
+    /*
+    ####################################################
+    Useful functions used in game.
+    ####################################################
+     */
 
     // world and physical unit conversion functions
     private float convert_w2pDist(float wdist){
@@ -168,13 +176,16 @@ public class GameScreen implements Screen {
 
     // star class
     private class Star extends Mass{
+        public Sprite sprite;
         public Circle circle;
         public int pxradius; // in pixels
 
-        private Star(float imass, int ipxradius){
+        private Star(float imass, int ipxradius, Texture image){
             super(imass);
             position.x = game.screenWidth/2;
             position.y = Math.round(game.screenHeight/2)+pxradius/2;
+            sprite = new Sprite(image);
+            sprite.setPosition(position.x-sprite.getWidth()/2, position.y-sprite.getHeight()/2);
             pxradius = ipxradius;
             circle = new Circle(position.x-pxradius/2, position.y-pxradius/2, pxradius);
         }
@@ -182,25 +193,31 @@ public class GameScreen implements Screen {
 
     private class Planet extends Mass{
         public Circle circle;
+        public Sprite sprite;
         public int pxradius; // in pixels
         public float semiMajorAxis; // in physical units
-        public float period; // in physical units\
+        public float orbitalPeriod; // in physical units
+        public float rotationalPeriod; // in physical units
+        public float rotationalAngle;
         public boolean probed;
 
         private float distanceMoved;
         private float angle;
 
-        private Planet(float imass, float isemiMajorAxis, int ipxradius){
+        private Planet(float imass, float isemiMajorAxis, int ipxradius, float irotationalPeriod, Texture image){
             super(imass);
             probed = false;
             semiMajorAxis = isemiMajorAxis;
             pxradius = ipxradius;
+            rotationalPeriod = irotationalPeriod;
             //position.x = screenWidth/2;
             //position.y = star.position.y - convert_p2wDist(semiMajorAxis);
             angle = 0f;
-            period = (float) Math.sqrt(Math.pow(semiMajorAxis,3d) / star.mass);
+            orbitalPeriod = (float) Math.sqrt(Math.pow(semiMajorAxis,3d) / star.mass);
             //circle = new Circle(position.x-pxradius/2, position.y-pxradius/2, pxradius);
             circle = new Circle(0f, 0f, pxradius);
+            sprite = new Sprite(image);
+            rotationalAngle = 0f;
             advance(0f);
         }
 
@@ -210,12 +227,14 @@ public class GameScreen implements Screen {
             //angle = star.getAngleTo(position);
             //position.x += (float) Math.cos(Math.toRadians(angle)) * distanceMoved;
             //position.y += (float) Math.sin(Math.toRadians(angle)) * distanceMoved;
-            angle += 360f * (convert_w2pTime(dt) / period);
+            angle += 360f * (convert_w2pTime(dt) /orbitalPeriod);
             position.x = star.position.x + convert_p2wDist(semiMajorAxis) * (float) Math.cos(Math.toRadians(angle));
             position.y = star.position.y + convert_p2wDist(semiMajorAxis) * (float) Math.sin(Math.toRadians(angle));
             circle.setX(position.x);
             circle.setY(position.y);
-
+            sprite.setPosition(position.x-sprite.getWidth()/2, position.y-sprite.getHeight()/2);
+            rotationalAngle += 360. * (dt/convert_p2wTime(rotationalPeriod));
+            sprite.setRotation(rotationalAngle);
         }
     }
 
@@ -230,6 +249,12 @@ public class GameScreen implements Screen {
         probes.add(probe);
 
     }
+
+        /*
+    ####################################################
+    The create function, called when game is started.
+    ####################################################
+     */
 
     public GameScreen(final PlanetProbe gam) {
         this.game = gam;
@@ -271,16 +296,30 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, game.screenWidth, game.screenHeight);
 
+        // create all our image textures
+        shipImage = new Texture(Gdx.files.internal("ship.png"));
+        probeImage = new Texture(Gdx.files.internal("probe.png"));
+        starImage = new Texture(Gdx.files.internal("star.png"));
+        planet_jupiterImage = new Texture(Gdx.files.internal("planet_jupiter.png"));
+
+        // create sprites to represent the ship
+        ship = new Sprite(shipImage);
+        ship.setPosition(shipX, shipY);
+
+        // probes array
+        probes = new Array<Probe>();
+
         // create our sprite batch and shape render
         shapeRenderer = new ShapeRenderer();
 
         // create our star
-        star = new Star(1f, 8);
+        star = new Star(1f, 16, starImage);
 
         // and our planets
         planets = new Array<Planet>();
         // add three planets with random masses (1e-2 - 1e-6 solar masses)
         // and random semimajor axes (0.01 - 0.25 AU).
+        /*
         for (int i=0; i<3; i++){
             float pmass = (float) Math.pow(10,((Math.random() * (-2 - -6)) + -6));
             float psemiMajorAxis = (float) (Math.random() * (0.25f - 0.01f)) + 0.01f;
@@ -290,20 +329,16 @@ public class GameScreen implements Screen {
                     + String.format("%.2f", psemiMajorAxis) + " "
                     + ppxradius + "\n";
         }
+        */
         //planets.add(new Planet(0.0005f, 0.1f, 3));
         //planets.add(new Planet(0.001f, 0.02f, 4));
         //planets.add(new Planet(1f-6, 0.2f, 2));
-
-        // create all our image textures
-        shipImage = new Texture(Gdx.files.internal("ship.png"));
-        probeImage = new Texture(Gdx.files.internal("probe.png"));
-
-        // create sprites to represent the ship
-        ship = new Sprite(shipImage);
-        ship.setPosition(shipX, shipY);
-
-        // probes array
-        probes = new Array<Probe>();
+        float pmass = (float) Math.pow(10,((Math.random() * (-2 - -6)) + -6));
+        float psemiMajorAxis = (float) (Math.random() * (0.25f - 0.01f)) + 0.01f;
+        planets.add(new Planet(pmass, psemiMajorAxis, 8, 0.1f, planet_jupiterImage));
+        planetString += String.format("%.1e", pmass) + " "
+                + String.format("%.2f", psemiMajorAxis) + " "
+                + "8" + "\n";
 
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
@@ -333,20 +368,25 @@ public class GameScreen implements Screen {
         });
     }
 
+        /*
+    ####################################################
+    The render function, called at ~30-60 fps
+    to update game continuously.
+    ####################################################
+     */
+
     @Override
     public void render(float delta) {
 
         // set background color and clear
-        Gdx.gl.glClearColor(1, 1, 1, 1);
+        Gdx.gl.glClearColor(225f/255f, 225f/255f, 255f/255f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // time difference
         deltaTime = Gdx.graphics.getDeltaTime();
 
         // tell the camera to update its matrices.
-        /*
-        is this necessary if the camera is not changing?
-        */
+        // is this necessary if the camera is not changing?
         //camera.update();
 
         // tell the SpriteBatch and ShapeRender to render in the
@@ -354,29 +394,29 @@ public class GameScreen implements Screen {
         game.batch.setProjectionMatrix(camera.combined);
         shapeRenderer.setProjectionMatrix(camera.combined);
 
-        // render our star
-        shapeRenderer.setColor(Color.BLACK);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.circle(star.position.x, star.position.y, star.pxradius);
-        for (Planet planet: planets){
-            if (planet.probed)
-                shapeRenderer.setColor(Color.RED);
-            else
-                shapeRenderer.setColor(Color.BLACK);
-            shapeRenderer.circle(planet.position.x, planet.position.y, planet.pxradius);
-        }
-        shapeRenderer.end();
-
         // batch draw everything
         game.batch.begin();
         //font.draw(batch, probeString, 10, screenHeight-10);
         game.font.draw(game.batch, planetString, game.screenWidth-100, game.screenHeight-10, 100, Align.left, false);
         game.bigfont.draw(game.batch, "DEMO", 5, game.screenHeight-10);
+        star.sprite.draw(game.batch);
         ship.draw(game.batch);
+        for (Planet planet: planets){
+            planet.sprite.draw(game.batch);
+        }
         for(Probe probe: probes) {
             probe.sprite.draw(game.batch);
         }
         game.batch.end();
+
+        // Red-out planet if probed
+        shapeRenderer.setColor(Color.RED);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        for (Planet planet: planets){
+            if (planet.probed)
+                shapeRenderer.circle(planet.circle.x, planet.circle.y, planet.pxradius);
+        }
+        shapeRenderer.end();
 
         // process user input
         if(Gdx.input.isTouched() && begin) {
@@ -421,7 +461,6 @@ public class GameScreen implements Screen {
 
                 probe.velocity.x += accel.x * deltaTime;
                 probe.velocity.y += accel.y * deltaTime;
-
 
                 //get direction of probe and move forward in that direction
                 float cosAng = (float) Math.cos(Math.toRadians(probe.getAngle()));
