@@ -24,6 +24,7 @@ public class World_env {
     private ArrayList<Star> stars;
     private ArrayList<Planet> planets;
     public ShapeRenderer shapeRenderer;
+    public Grid bg_grid;
 
     public World_env(PlanetProbe gameReference){
         gameRef = gameReference;
@@ -31,6 +32,7 @@ public class World_env {
         planets = new ArrayList<Planet>();
         stars = new ArrayList<Star>();
         shapeRenderer = new ShapeRenderer();
+        bg_grid = new Grid(gameRef.screenWidth, gameRef.screenHeight, gameRef.screenWidth/12, gameRef.screenHeight/14, this);
 
     }
 
@@ -56,6 +58,10 @@ public class World_env {
 
     public ArrayList<Probe> probeList(){
         return probes;
+    }
+
+    public void renderGrid(SpriteBatch sb){
+        bg_grid.render(sb);
     }
 
     public void render(SpriteBatch sb){
@@ -89,6 +95,7 @@ public class World_env {
     }
 
     public void update(float delta){
+        bg_grid.update(delta);
 
         for (Star star: stars){
             star.update(delta);

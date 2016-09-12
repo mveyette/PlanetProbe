@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector2;
@@ -62,7 +63,9 @@ public class GameScreen implements Screen {
     private String planetString = "";
     private float deltaTime;
     public ShapeRenderer shapeRenderer;
-
+    private Sprite grid_bg;
+    private ShaderProgram grid_shader;
+    private ShaderProgram default_shader;
 
 
     private void spawnProbe(float launchAngle, float launchSpeed){
@@ -88,6 +91,7 @@ public class GameScreen implements Screen {
         shipHeight = 32;
         shipY = 32;
         shipX = game.screenWidth / 2 - shipWidth / 2;
+
 
 
         // scalar between probe launch line in pixels and launch speed in pixels per second
@@ -139,6 +143,7 @@ public class GameScreen implements Screen {
                 if (begin) {
                     releasePos.set(x, y, 0);
                     camera.unproject(releasePos);
+
                     float launchAngle = -1f * (float) Math.toDegrees(Math.atan((releasePos.x - game.screenWidth / 2) / (releasePos.y - shipY - shipHeight / 2)));
                     float launchSpeed = touchPos.sub(new Vector3(shipX + shipWidth / 2, shipY + shipHeight / 2, 0f)).len() * probeLaunchTouchScale;
                     if (launchSpeed > maxLaunchSpeed) {
@@ -173,13 +178,20 @@ public class GameScreen implements Screen {
         deltaTime = Gdx.graphics.getDeltaTime();
 
         game.batch.setProjectionMatrix(camera.combined);
-        gameWorld.shapeRenderer.setProjectionMatrix(camera.combined);
+
 
 
         shapeRenderer.setProjectionMatrix(camera.combined);
         // batch draw everything
+
+        gameWorld.shapeRenderer.setProjectionMatrix(camera.combined);
+        gameWorld.renderGrid(game.batch);
+
         game.batch.begin();
+
+
         //font.draw(batch, probeString, 10, screenHeight-10);
+
         game.font.draw(game.batch, planetString, game.screenWidth-100, game.screenHeight-10, 100, Align.left, false);
         game.bigfont.draw(game.batch, "DEMO", 5, game.screenHeight-10);
 
@@ -200,7 +212,8 @@ public class GameScreen implements Screen {
             camera.unproject(touchPos);
             shipRotation = -1f * (float) Math.toDegrees(Math.atan((touchPos.x-game.screenWidth/2)/(touchPos.y-shipY-shipHeight/2)));
             ship.setRotation(shipRotation);
-
+            System.out.println(touchPos.x + ", " + touchPos.y);
+            gameWorld.bg_grid.applyImplosiveForce(1,new Vector2(touchPos.x, touchPos.y), 100);
             // render line between ship and touchPos
             launchVector.set(shipX+shipWidth/2, shipY+shipHeight/2, 0f);
             launchVector.sub(touchPos).scl(-1f);
