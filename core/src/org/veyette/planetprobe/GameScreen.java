@@ -34,6 +34,7 @@ public class GameScreen implements Screen {
     private Texture probeImage;
     private Texture starImage;
     private Texture planet_jupiterImage;
+    private Texture planet_jupiter_shadowImage;
 
 
     private Sprite ship;
@@ -101,12 +102,13 @@ public class GameScreen implements Screen {
         probeImage = new Texture(Gdx.files.internal("probe.png"));
         starImage = new Texture(Gdx.files.internal("star.png"));
         planet_jupiterImage = new Texture(Gdx.files.internal("planet_jupiter.png"));
+        planet_jupiter_shadowImage = new Texture(Gdx.files.internal("planet_jupiter_shadow.png"));
 
         // create sprites to represent the ship
         ship = new Sprite(shipImage);
         ship.setPosition(shipX, shipY);
 
-        // create our sprite batch and shape render
+        // create our planetSprite batch and shape render
 
         bg = new Sprite(new Texture(Gdx.files.internal("bg.png")));
         bg.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -125,7 +127,7 @@ public class GameScreen implements Screen {
         float pmass = .008f;//(float) Math.pow(10,((Math.random() * (-2 - -6)) + -4.1));
         float psemiMajorAxis = (float) (Math.random() * (0.25f - 0.01f)) + 0.01f;
 
-        gameWorld.add_planet(new Planet(pmass, star.mass, new Vector2(star.position.x, star.position.y), psemiMajorAxis, 8, 1000000f, planet_jupiterImage));
+        gameWorld.add_planet(new Planet(pmass, star.mass, new Vector2(star.position.x, star.position.y), psemiMajorAxis, 8, 1000000f, planet_jupiterImage, planet_jupiter_shadowImage));
         planetString += String.format("%.1e", pmass) + " "
                 + String.format("%.2f", psemiMajorAxis) + " "
                 + "8" + "\n";
@@ -187,7 +189,7 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         fpslogger.log();
         // set background color and clear
-        Gdx.gl.glClearColor(0, 0, 0, 1f);
+        Gdx.gl.glClearColor(225f/255f, 225f/255f, 255f/255f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // time difference

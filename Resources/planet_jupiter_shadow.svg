@@ -15,7 +15,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.5 r10040"
-   sodipodi:docname="planet_jupiter2.svg"
+   sodipodi:docname="planet_jupiter_shadow.svg"
    inkscape:export-filename="C:\Users\Mark\Dropbox\Android\Project_Folders\PlanetProbe\Resources\planet_jupiter.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
@@ -290,44 +290,15 @@
      transform="translate(0,-1020.3622)">
     <path
        sodipodi:type="arc"
-       style="color:#000000;fill:#ff9d00;fill-opacity:1;stroke:none;stroke-width:5.47826098999999990;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
-       id="path2991"
+       style="color:#000000;fill:#000000;fill-opacity:0.58823532;stroke:none;stroke-width:5.47826098999999990;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path2991-0"
        sodipodi:cx="15"
        sodipodi:cy="15"
        sodipodi:rx="7"
        sodipodi:ry="7"
-       d="m 22,15 c 0,3.865993 -3.134007,7 -7,7 -3.865993,0 -7,-3.134007 -7,-7 0,-3.865993 3.134007,-7 7,-7 3.865993,0 7,3.134007 7,7 z"
-       transform="matrix(1.1428571,0,0,1.1428571,-1.1428567,1019.2193)" />
-    <path
-       sodipodi:type="arc"
-       style="color:#000000;fill:none;stroke:#f2dec5;stroke-width:2.20650601;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
-       id="path3785-7"
-       sodipodi:cx="15.5"
-       sodipodi:cy="16.5"
-       sodipodi:rx="5.3788071"
-       sodipodi:ry="5.5"
-       d="m 20.878807,16.5 c 0,3.037566 -2.408174,5.5 -5.378807,5.5 -2.970633,0 -5.378807,-2.462434 -5.378807,-5.5 0,-3.037566 2.408174,-5.5 5.378807,-5.5 2.970633,0 5.378807,2.462434 5.378807,5.5 z"
-       transform="matrix(0.72727273,0,0,0.63544068,2.7272725,1025.8774)" />
-    <path
-       sodipodi:type="arc"
-       style="color:#000000;fill:none;stroke:#f2dec5;stroke-width:1.44913768999999990;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
-       id="path3785"
-       sodipodi:cx="15.5"
-       sodipodi:cy="16.5"
-       sodipodi:rx="7"
-       sodipodi:ry="7"
-       d="m 22.5,16.5 c 0,3.865993 -3.134007,7 -7,7 -3.865993,0 -7,-3.134007 -7,-7 0,-3.865993 3.134007,-7 7,-7 3.865993,0 7,3.134007 7,7 z"
-       transform="matrix(1.0714286,0,0,1,-2.1071433,1019.8622)"
-       clip-path="url(#clipPath4065)" />
-    <path
-       sodipodi:type="arc"
-       style="color:#000000;fill:#ff090c;fill-opacity:1;stroke:none;stroke-width:1.50004424000000000;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;stroke-miterlimit:4;stroke-dasharray:none"
-       id="path4073"
-       sodipodi:cx="21.5"
-       sodipodi:cy="26.5"
-       sodipodi:rx="0.5"
-       sodipodi:ry="0.5"
-       d="M 22,26.5 C 22,26.776142 21.776142,27 21.5,27 21.223858,27 21,26.776142 21,26.5 21,26.223858 21.223858,26 21.5,26 c 0.276142,0 0.5,0.223858 0.5,0.5 z"
-       transform="matrix(1.4125299,-4.5411555,2.228675,0.71954375,-69.517118,1119.2267)" />
+       d="M 15,22 A 7,7 0 1 1 15,8 l 0,7 z"
+       transform="matrix(1.1428571,0,0,1.1428571,-1.1428567,1019.2193)"
+       sodipodi:start="1.5707963"
+       sodipodi:end="4.712389" />
   </g>
 </svg>

@@ -13,7 +13,8 @@ import org.veyette.planetprobe.helper.GlbFuncs;
  */
 public class Planet extends Mass{
     public Circle circle;
-    public Sprite sprite;
+    public Sprite planetSprite;
+    public Sprite shadowSprite;
     public float semiMajorAxis; // in physical units
     public float orbitalPeriod; // in physical units
     public float rotationalPeriod; // in physical units
@@ -25,7 +26,7 @@ public class Planet extends Mass{
     private float angle;
 
 
-    public Planet(float imass, float starmass, Vector2 star_position, float isemiMajorAxis, int ipxradius, float irotationalPeriod, Texture image){
+    public Planet(float imass, float starmass, Vector2 star_position, float isemiMajorAxis, int ipxradius, float irotationalPeriod, Texture planetImage, Texture shadowImage){
         super(imass);
         star_pos = star_position;
         probed = false;
@@ -38,13 +39,15 @@ public class Planet extends Mass{
         orbitalPeriod = (float) Math.sqrt(Math.pow(semiMajorAxis,3d) / starmass);
         //circle = new Circle(position.x-pxradius/2, position.y-pxradius/2, pxradius);
         circle = new Circle(0f, 0f, pxradius);
-        sprite = new Sprite(image);
+        planetSprite = new Sprite(planetImage);
+        shadowSprite = new Sprite(shadowImage);
         rotationalAngle = 0f;
         update(0f);
     }
 
     public void render(SpriteBatch sb){
-            sprite.draw(sb);
+            planetSprite.draw(sb);
+            shadowSprite.draw(sb);
     }
 
 
@@ -59,8 +62,10 @@ public class Planet extends Mass{
         position.y = star_pos.y + GlbFuncs.convert_p2wDist(semiMajorAxis) * (float) Math.sin(Math.toRadians(angle));
         circle.setX(position.x);
         circle.setY(position.y);
-        sprite.setPosition(position.x-sprite.getWidth()/2, position.y-sprite.getHeight()/2);
+        planetSprite.setPosition(position.x- planetSprite.getWidth()/2, position.y- planetSprite.getHeight()/2);
         rotationalAngle += 360. * (delta/GlbFuncs.convert_p2wTime(rotationalPeriod));
-        sprite.setRotation(rotationalAngle);
+        planetSprite.setRotation(rotationalAngle);
+        shadowSprite.setPosition(position.x- shadowSprite.getWidth()/2, position.y- shadowSprite.getHeight()/2);
+        shadowSprite.setRotation(GlbFuncs.getVelAngle(new Vector2(position).sub(star_pos)) - 90f);
     }
 }

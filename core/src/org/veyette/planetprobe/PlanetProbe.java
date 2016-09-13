@@ -8,8 +8,8 @@ public class PlanetProbe extends Game {
     public BitmapFont font;
     public BitmapFont bigfont;
     public SpriteBatch batch;
-    public int screenWidth = 640;
-    public int screenHeight = 1136;
+    public int screenWidth = 720;
+    public int screenHeight = 1280;
 
     public void create() {
         batch = new SpriteBatch();
