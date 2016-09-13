@@ -126,7 +126,7 @@ public class GameScreen implements Screen {
         float pmass = (float) Math.pow(10,((Math.random() * (-2 - -6)) + -6));
         float psemiMajorAxis = (float) (Math.random() * (0.25f - 0.01f)) + 0.01f;
 
-        gameWorld.add_planet(new Planet(pmass, star.mass, new Vector2(star.position.x, star.position.y), psemiMajorAxis, 8, 0.1f, planet_jupiterImage));
+        gameWorld.add_planet(new Planet(pmass, star.mass, new Vector2(star.position.x, star.position.y), psemiMajorAxis, 8, 1000000f, planet_jupiterImage));
         planetString += String.format("%.1e", pmass) + " "
                 + String.format("%.2f", psemiMajorAxis) + " "
                 + "8" + "\n";
