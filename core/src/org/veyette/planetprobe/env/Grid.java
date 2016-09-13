@@ -1,7 +1,9 @@
 package org.veyette.planetprobe.env;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -128,19 +130,30 @@ public class Grid {
 
         Matrix4 projection = gameWorld.shapeRenderer.getProjectionMatrix();
 
+        Gdx.gl.glLineWidth(7);
+
+        GlbFuncs.debugRenderer.setProjectionMatrix(projection);
+        GlbFuncs.debugRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+
 
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++) {
                 Vector2 p = points[y][x].position;
                 Vector2 pi = points[y][x].init_position;
-                Color col =  new Color((float)points[y][x].getLength()/10.0f,.15f,.15f,1);
+                Color col =  new Color((float)points[y][x].getLength()/10.0f,.15f,.15f,.5f);
                 //GlbFuncs.DrawDebugSpot(pi, Color.BLACK, projection);
-                GlbFuncs.DrawDebugSpot(p, col, projection);
-
+                if(!points[y][x].is_asleep) {
+                    GlbFuncs.debugRenderer.setColor(col);
+                    GlbFuncs.debugRenderer.circle(p.x, p.y, 1);
+                 //   GlbFuncs.DrawDebugSpot(p, col, projection);
+                }
 
             }
         }
+        GlbFuncs.debugRenderer.end();
+        Gdx.gl.glLineWidth(1);
 
 
 

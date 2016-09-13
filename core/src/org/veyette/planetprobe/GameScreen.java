@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -66,19 +67,10 @@ public class GameScreen implements Screen {
     private Sprite grid_bg;
     private ShaderProgram grid_shader;
     private ShaderProgram default_shader;
+    Sprite bg;
+    FPSLogger fpslogger;
 
 
-    private void spawnProbe(float launchAngle, float launchSpeed){
-
-        // define position and velocity vectors
-        Vector2 position = new Vector2(shipX + shipWidth/2 - probeImage.getWidth()/2, shipY+shipHeight/2 - probeImage.getHeight()/2);
-        Vector2 velocity = new Vector2(-1f * (float) Math.sin(Math.toRadians(launchAngle)) * launchSpeed,
-                (float) Math.cos(Math.toRadians(launchAngle)) * launchSpeed);
-
-        Probe probe = new Probe(probeImage, position, velocity, gameWorld);
-        gameWorld.add_probe(probe);
-
-    }
 
 
     public GameScreen(final PlanetProbe gam) {
@@ -93,7 +85,7 @@ public class GameScreen implements Screen {
         shipX = game.screenWidth / 2 - shipWidth / 2;
 
 
-
+        fpslogger = new FPSLogger();
         // scalar between probe launch line in pixels and launch speed in pixels per second
         probeLaunchTouchScale = 0.5f;
 
@@ -115,6 +107,13 @@ public class GameScreen implements Screen {
         ship.setPosition(shipX, shipY);
 
         // create our sprite batch and shape render
+
+        bg = new Sprite(new Texture(Gdx.files.internal("bg.png")));
+        bg.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        String vertexShader = Gdx.files.internal("gridvertex.glsl").readString();
+        String fragmentShader = Gdx.files.internal("gridfragment.glsl").readString();
+        grid_shader = new ShaderProgram(vertexShader,fragmentShader);
 
 
         // create our star
@@ -160,6 +159,23 @@ public class GameScreen implements Screen {
         });
     }
 
+
+
+    private void spawnProbe(float launchAngle, float launchSpeed){
+
+        // define position and velocity vectors
+        Vector2 position = new Vector2(shipX + shipWidth/2 - probeImage.getWidth()/2, shipY+shipHeight/2 - probeImage.getHeight()/2);
+        Vector2 velocity = new Vector2(-1f * (float) Math.sin(Math.toRadians(launchAngle)) * launchSpeed,
+                (float) Math.cos(Math.toRadians(launchAngle)) * launchSpeed);
+
+        Probe probe = new Probe(probeImage, position, velocity, gameWorld);
+        gameWorld.add_probe(probe);
+
+
+
+
+    }
+
         /*
     ####################################################
     The render function, called at ~30-60 fps
@@ -169,7 +185,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-
+        fpslogger.log();
         // set background color and clear
         Gdx.gl.glClearColor(0, 0, 0, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -189,9 +205,10 @@ public class GameScreen implements Screen {
 
         game.batch.begin();
 
-
+        //game.batch.setShader(grid_shader);
+        //game.batch.draw(bg,bg.getX(),bg.getY(),bg.getWidth(),bg.getHeight());
         //font.draw(batch, probeString, 10, screenHeight-10);
-
+        game.batch.setShader(null);
         game.font.draw(game.batch, planetString, game.screenWidth-100, game.screenHeight-10, 100, Align.left, false);
         game.bigfont.draw(game.batch, "DEMO", 5, game.screenHeight-10);
 

@@ -23,6 +23,7 @@ public class SpringPoint {
     public float inverseMass;
     public Vector2 init_position;
     public int id;
+    public boolean is_asleep;
 
 
     public SpringPoint(){
@@ -32,6 +33,7 @@ public class SpringPoint {
         anchor = new Vector2(0,0);
         velocity = new Vector2(0,0);
         inverseMass = 0;
+        is_asleep= false;
     }
 
     public SpringPoint(Vector2 pos, Vector2 anch, float stiff_val, float invMass, int ID){
@@ -44,6 +46,7 @@ public class SpringPoint {
         init_position  = new Vector2(pos.x,pos.y);
         velocity = new Vector2(0,0);
         inverseMass = invMass;
+        is_asleep= false;
     }
 
 
@@ -72,41 +75,43 @@ public class SpringPoint {
         }
     }
 
-    public void update(float delta){
+    public void update(float delta) {
 
 
-        if(inverseMass == 0){
-            position.set(anchor);
-        }
 
-        else {
+        if (!is_asleep) {
+            if (inverseMass == 0) {
+                position.set(anchor);
+            } else {
 
-            checkPos();
+                checkPos();
 
-            velocity.x += accel.x * delta;
-            velocity.y += accel.y * delta;
 
-            //System.out.println(accel.toString());
-            if(velocity.len() > 2.2){
-               velocity = velocity.nor().scl(2.2f);
+                velocity.x += accel.x * delta;
+                velocity.y += accel.y * delta;
+
+                //System.out.println(accel.toString());
+                if (velocity.len() > 2.2) {
+                    velocity = velocity.nor().scl(2.2f);
+
+                }
+
+                position.x += velocity.x;
+                position.y += velocity.y;
+
+                this.position = new Vector2(position.x, position.y);
+
+
+                this.accel = Vector2.Zero;
+
+                if (velocity.len2() < 0.1f * .1f) {
+                    velocity = Vector2.Zero;
+                }
+
+
+                this.velocity = new Vector2(velocity.x * damping, velocity.y * damping);
 
             }
-
-            position.x += velocity.x;
-            position.y += velocity.y;
-
-            this.position = new Vector2(position.x, position.y);
-
-
-            this.accel = Vector2.Zero;
-
-            if (velocity.len2() < 0.1f * .1f) {
-                velocity = Vector2.Zero;
-            }
-
-
-            this.velocity = new Vector2(velocity.x*damping, velocity.y*damping);
-
         }
     }
 
