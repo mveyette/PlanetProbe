@@ -6,6 +6,9 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
+import org.veyette.planetprobe.actors.Mass;
+import org.veyette.planetprobe.actors.Planet;
+import org.veyette.planetprobe.actors.Star;
 import org.veyette.planetprobe.helper.GlbFuncs;
 
 import java.util.ArrayList;
@@ -15,96 +18,105 @@ import java.util.ArrayList;
  */
 public class Grid {
 
-    ArrayList<SpringPoint> points;
+    SpringPoint[][] points;
+    SpringPoint[] linear_points;
     int cols;
     int rows;
+    float stiff_val;
     World_env gameWorld;
 
-    public Grid(float width, float height, float spacingX, float spacingY, World_env worldRef){
+    public Grid(int width, int height, int spacingX, int spacingY, float stiffness, World_env worldRef){
         int numColumns = (int)(width/spacingX)+1;
         int numRows = (int)(height/spacingY)+1;
         gameWorld = worldRef;
-        points = new ArrayList<SpringPoint>();
+        stiff_val = stiffness;
+        points = new SpringPoint[numRows][numColumns];
 
         cols = numColumns;
         rows = numRows;
 
         int column = 0, row = 0;
+        int count = 0;
 
-        for (float y = 0; y <= height; y += spacingY)
+        for (int y = 0; y <= height; y += spacingY)
         {
-            for (float x = 0; x <= width; x += spacingX)
+            for (int x = 0; x <= width; x += spacingX)
             {
-                System.out.println(width);
-                System.out.println(x);
-                float invmass = 1.0f;
-
-                if(x <= 0 || y <=0 || x >= width || y >= height-spacingY) {
-                    invmass = 0;
-                    System.out.println("inv0");
-                }
-                    AddPointMass(points, column, row, new SpringPoint(new Vector2(x, y), new Vector2(x, y), invmass));
+                float invmass = 1f;
+                points[row][column] = new SpringPoint(new Vector2(x, y), new Vector2(x, y), stiffness, invmass, count);
 
                 column++;
+                count++;
             }
             row++;
             column = 0;
         }
 
+        linear_points = unravel(points);
+
     }
 
 
-    public void AddPointMass(ArrayList<SpringPoint> array, int x, int y, SpringPoint inp)
-    {
-        array.add(inp);
-    }
-
-    public SpringPoint GetPointMass(ArrayList<SpringPoint> array, int x, int y)
-    {
-        return array.get(y * cols + x);
-    }
-
-
-    public void applyImplosiveForce(float force, Vector2 position, float radius)
-    {
-        for (int i = 0; i < cols * rows; i++)
-        {
-            float dist2 = position.dst2(points.get(i).position);
-            if (dist2 < radius * radius)
-            {
-                points.get(i).applyForce((position.cpy().sub(points.get(i).position)).scl(100.0f * force).scl(1/(100 + dist2)));
-                points.get(i).increaseDamping(0.9f);
+    public SpringPoint[] unravel(SpringPoint[][] array) {
+        int r = array.length;
+        if (r == 0) {
+            return new SpringPoint[0]; // Special case: zero-length array
+        }
+        int c = array[0].length;
+        SpringPoint[] result = new SpringPoint[r * c];
+        int index = 0;
+        for (int i = 0; i < r; i++) {
+            for (int j = 0; j < c; j++) {
+                result[index] = array[i][j];
+                index++;
             }
         }
+        return result;
     }
+
+
+    public Vector2 calculate_accel_body(Mass p, Vector2 position){
+        Vector2 norm = new Vector2(p.position.x-position.x, p.position.y - position.y);
+        float len = norm.len();
+        float Gfactor = 30000.0f;
+
+
+        if(len != 0 ) {
+            norm = norm.nor();
+
+            float dist = position.dst(p.position);
+
+            //System.out.println(new Vector2(norm.x * (p.mass)/(dist), norm.y * (p.mass)/(dist)).toString());
+            return new Vector2(norm.x * (p.mass*Gfactor)/(dist * dist), norm.y * (p.mass*Gfactor)/(dist * dist));
+        }
+
+
+        return Vector2.Zero;
+    }
+
+
 
     public void update(float delta){
 
+        for(int i = 0; i < linear_points.length; i++) {
 
-        for(int i = 0; i < points.size(); i++)
-        {
-            points.get(i).update(delta);
+                for (Star star : gameWorld.starList()) {
+                    Vector2 paccel = calculate_accel_body(star, linear_points[i].position);
+                    linear_points[i].applyForce(paccel);
+                }
+
+            for (Planet pl : gameWorld.planetList()) {
+                Vector2 paccel = calculate_accel_body(pl, linear_points[i].position);
+                linear_points[i].applyForce(paccel);
+            }
+
+                linear_points[i].update(delta);
+            }
+
 
         }
 
-    }
 
-
-    public float catmullRom( float value1,  float value2,  float value3,  float value4, float amount)
-    {
-
-        float amountSquared = amount * amount;
-        float amountCubed = amountSquared * amount;
-        return (float)(0.5f * (2.0f * value2 +
-                (value3 - value1) * amount +
-                (2.0f * value1 - 5.0f * value2 + 4.0f * value3 - value4) * amountSquared +
-                (3.0f * value2 - value1 - 3.0f * value3 + value4) * amountCubed));
-    }
-
-    public Vector2 catmullRom( Vector2 value1, Vector2 value2, Vector2 value3, Vector2 value4, float amount)
-    {
-        return new Vector2(catmullRom(value1.x, value2.x, value3.x, value4.x, amount), catmullRom(value1.y, value2.y, value3.y, value4.y, amount));
-    }
 
 
     public void render(SpriteBatch sb)
@@ -112,30 +124,21 @@ public class Grid {
 
         int width = cols;
         int height = rows;
-        int linewidth = 4;
-        Color col =  Color.BLACK;
+        int linewidth = 1;
+
         Matrix4 projection = gameWorld.shapeRenderer.getProjectionMatrix();
 
 
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++) {
+                Vector2 p = points[y][x].position;
+                Vector2 pi = points[y][x].init_position;
+                Color col =  new Color((float)points[y][x].getLength()/10.0f,.15f,.15f,1);
+                //GlbFuncs.DrawDebugSpot(pi, Color.BLACK, projection);
+                GlbFuncs.DrawDebugSpot(p, col, projection);
 
-                if (x == 0 || y == 0 ) {
-                    Vector2 p = GetPointMass(points, x, y).position;
-                    if (GetPointMass(points, x, y).inverseMass == 0) {
-                        GlbFuncs.DrawDebugSpot(p, Color.RED, projection);
-                    }
-                } else {
-                    Vector2 left, up;
-                    Vector2 p = GetPointMass(points, x, y).position;
-                    GlbFuncs.DrawDebugSpot(p, col, projection);
 
-                    if (GetPointMass(points, x, y).inverseMass == 0) {
-                        GlbFuncs.DrawDebugSpot(p, Color.RED, projection);
-                    }
-
-                }
             }
         }
 

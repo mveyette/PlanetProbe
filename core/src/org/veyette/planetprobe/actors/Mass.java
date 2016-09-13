@@ -13,6 +13,7 @@ public class Mass{
 
     private float totalAcceleration;
     private float angle;
+    public int pxradius = 0;
 
     public Mass(float imass){
         // need to define position in extended classes

@@ -123,7 +123,7 @@ public class GameScreen implements Screen {
 
 
 
-        float pmass = (float) Math.pow(10,((Math.random() * (-2 - -6)) + -6));
+        float pmass = .008f;//(float) Math.pow(10,((Math.random() * (-2 - -6)) + -4.1));
         float psemiMajorAxis = (float) (Math.random() * (0.25f - 0.01f)) + 0.01f;
 
         gameWorld.add_planet(new Planet(pmass, star.mass, new Vector2(star.position.x, star.position.y), psemiMajorAxis, 8, 1000000f, planet_jupiterImage));
@@ -171,7 +171,7 @@ public class GameScreen implements Screen {
     public void render(float delta) {
 
         // set background color and clear
-        Gdx.gl.glClearColor(225f/255f, 225f/255f, 255f/255f, 1f);
+        Gdx.gl.glClearColor(0, 0, 0, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // time difference
@@ -212,8 +212,9 @@ public class GameScreen implements Screen {
             camera.unproject(touchPos);
             shipRotation = -1f * (float) Math.toDegrees(Math.atan((touchPos.x-game.screenWidth/2)/(touchPos.y-shipY-shipHeight/2)));
             ship.setRotation(shipRotation);
-            System.out.println(touchPos.x + ", " + touchPos.y);
-            gameWorld.bg_grid.applyImplosiveForce(1,new Vector2(touchPos.x, touchPos.y), 100);
+
+
+
             // render line between ship and touchPos
             launchVector.set(shipX+shipWidth/2, shipY+shipHeight/2, 0f);
             launchVector.sub(touchPos).scl(-1f);

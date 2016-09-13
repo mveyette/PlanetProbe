@@ -80,11 +80,11 @@ public class GlbFuncs {
 
     public static void DrawDebugSpot(Vector2 position, Color color, Matrix4 projectionMatrix)
     {
-        Gdx.gl.glLineWidth(5);
+        Gdx.gl.glLineWidth(7);
         debugRenderer.setProjectionMatrix(projectionMatrix);
         debugRenderer.begin(ShapeRenderer.ShapeType.Line);
         debugRenderer.setColor(color);
-        debugRenderer.circle(position.x, position.y, 10);
+        debugRenderer.circle(position.x, position.y, 1);
         debugRenderer.end();
         Gdx.gl.glLineWidth(1);
     }

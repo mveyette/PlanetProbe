@@ -14,7 +14,6 @@ import org.veyette.planetprobe.helper.GlbFuncs;
 public class Planet extends Mass{
     public Circle circle;
     public Sprite sprite;
-    public int pxradius; // in pixels
     public float semiMajorAxis; // in physical units
     public float orbitalPeriod; // in physical units
     public float rotationalPeriod; // in physical units

@@ -11,7 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 public class Star extends Mass {
     public Sprite sprite;
     public Circle circle;
-    public int pxradius; // in pixels
+     // in pixels
 
     public Star(float imass, Vector2 _position, int ipxradius, Texture image){
         super(imass);

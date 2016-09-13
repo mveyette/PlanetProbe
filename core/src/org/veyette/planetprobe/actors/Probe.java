@@ -63,6 +63,9 @@ public class Probe{
         velocity.x += accel.x * delta;
         velocity.y += accel.y * delta;
 
+        velocity.x = velocity.x*.9999f;
+        velocity.y = velocity.y*.9999f;
+
         float cosAng = (float) Math.cos(Math.toRadians(getAngle()));
         float sinAng = (float) Math.sin(Math.toRadians(getAngle()));
 

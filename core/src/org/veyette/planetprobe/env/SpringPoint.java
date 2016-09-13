@@ -14,32 +14,35 @@ import com.badlogic.gdx.math.Vector2;
  * Created by Sparky on 9/11/2016.
  */
 public class SpringPoint {
-    private Vector2 accel;
+    public Vector2 accel;
     private float damping;
-
+    public float stiffness;
     public Vector2 position;
     public Vector2 anchor;
     public Vector2 velocity;
     public float inverseMass;
     public Vector2 init_position;
+    public int id;
 
 
     public SpringPoint(){
-        accel = Vector2.Zero;
-        damping = .98f;
-        position = Vector2.Zero;
-        anchor = Vector2.Zero;
-        velocity = Vector2.Zero;
+        accel = new Vector2(0,0);
+        damping = .90f;
+        position = new Vector2(0,0);
+        anchor = new Vector2(0,0);
+        velocity = new Vector2(0,0);
         inverseMass = 0;
     }
 
-    public SpringPoint(Vector2 pos, Vector2 anch, float invMass){
-        accel = Vector2.Zero;
-        damping = .98f;
+    public SpringPoint(Vector2 pos, Vector2 anch, float stiff_val, float invMass, int ID){
+        accel = new Vector2(0,0);
+        damping = .9f;
+        id = ID;
+        stiffness = stiff_val;
         position = pos;
         anchor = anch;
-        init_position = pos.cpy();
-        velocity = Vector2.Zero;
+        init_position  = new Vector2(pos.x,pos.y);
+        velocity = new Vector2(0,0);
         inverseMass = invMass;
     }
 
@@ -47,45 +50,63 @@ public class SpringPoint {
 
 
     public void applyForce(Vector2 force){
-        if(inverseMass > 0) {
-            accel.add(force.scl(inverseMass));
-        }
-
+        accel = new Vector2(accel.x + force.x*inverseMass, accel.y + force.y*inverseMass);
     }
 
-    public void increaseDamping(float factor){
-        damping *= factor;
 
+
+    public float getLength(){
+        return position.cpy().sub(anchor).len();
     }
 
     public void checkPos(){
         Vector2 norm = position.cpy().sub(anchor);
-        norm = norm.scl(norm.len2());
+        float lensq = norm.len2();
+        if(lensq != 0) {
+            norm = new Vector2(norm.x / lensq, norm.y / lensq);
 
-        float dist = position.dst(anchor);
 
-        applyForce(norm.scl(-dist*dist));
+            float dist = position.dst2(anchor)*stiffness;
 
+            applyForce(new Vector2(norm.x*-dist*dist, norm.y*-dist*dist));
+        }
     }
 
     public void update(float delta){
+
+
         if(inverseMass == 0){
             position.set(anchor);
-        }else {
+        }
+
+        else {
 
             checkPos();
 
-            velocity.add(accel.scl(delta));
-            position.add(velocity);
-            accel = Vector2.Zero;
+            velocity.x += accel.x * delta;
+            velocity.y += accel.y * delta;
 
-            if (velocity.len2() < 0.0001f * 0.0001f) {
+            //System.out.println(accel.toString());
+            if(velocity.len() > 2.2){
+               velocity = velocity.nor().scl(2.2f);
+
+            }
+
+            position.x += velocity.x;
+            position.y += velocity.y;
+
+            this.position = new Vector2(position.x, position.y);
+
+
+            this.accel = Vector2.Zero;
+
+            if (velocity.len2() < 0.1f * .1f) {
                 velocity = Vector2.Zero;
             }
 
 
-            velocity.scl(damping);
-            damping = 0.98f;
+            this.velocity = new Vector2(velocity.x*damping, velocity.y*damping);
+
         }
     }
 
