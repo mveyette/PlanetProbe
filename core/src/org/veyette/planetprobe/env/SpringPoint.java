@@ -24,21 +24,23 @@ public class SpringPoint {
     public Vector2 init_position;
     public int id;
     public boolean is_asleep;
+    public float length;
 
 
     public SpringPoint(){
         accel = new Vector2(0,0);
-        damping = .90f;
+        damping = .80f;
         position = new Vector2(0,0);
         anchor = new Vector2(0,0);
         velocity = new Vector2(0,0);
         inverseMass = 0;
         is_asleep= false;
+        length = 0;
     }
 
     public SpringPoint(Vector2 pos, Vector2 anch, float stiff_val, float invMass, int ID){
         accel = new Vector2(0,0);
-        damping = .9f;
+        damping = .80f;
         id = ID;
         stiffness = stiff_val;
         position = pos;
@@ -47,6 +49,7 @@ public class SpringPoint {
         velocity = new Vector2(0,0);
         inverseMass = invMass;
         is_asleep= false;
+        length = 0;
     }
 
 
@@ -59,7 +62,8 @@ public class SpringPoint {
 
 
     public float getLength(){
-        return position.cpy().sub(anchor).len();
+        return length;
+
     }
 
     public void checkPos(){
@@ -67,11 +71,8 @@ public class SpringPoint {
         float lensq = norm.len2();
         if(lensq != 0) {
             norm = new Vector2(norm.x / lensq, norm.y / lensq);
-
-
             float dist = position.dst2(anchor)*stiffness;
-
-            applyForce(new Vector2(norm.x*-dist*dist, norm.y*-dist*dist));
+            applyForce(new Vector2(norm.x*-dist, norm.y*-dist));
         }
     }
 
@@ -104,13 +105,13 @@ public class SpringPoint {
 
                 this.accel = Vector2.Zero;
 
-                if (velocity.len2() < 0.1f * .1f) {
+                if (velocity.len2() < 0.01f * .01f) {
                     velocity = Vector2.Zero;
                 }
 
 
                 this.velocity = new Vector2(velocity.x * damping, velocity.y * damping);
-
+                length = position.cpy().sub(anchor).len();
             }
         }
     }

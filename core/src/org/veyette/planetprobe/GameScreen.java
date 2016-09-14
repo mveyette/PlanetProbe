@@ -124,8 +124,8 @@ public class GameScreen implements Screen {
 
 
 
-        float pmass = .008f;//(float) Math.pow(10,((Math.random() * (-2 - -6)) + -4.1));
-        float psemiMajorAxis = (float) (Math.random() * (0.25f - 0.01f)) + 0.01f;
+        float pmass = .02f;//(float) Math.pow(10,((Math.random() * (-2 - -6)) + -4.1));
+        float psemiMajorAxis = .25f;//(float) (Math.random() * (0.25f - 0.01f)) + 0.01f;
 
         gameWorld.add_planet(new Planet(pmass, star.mass, new Vector2(star.position.x, star.position.y), psemiMajorAxis, 8, 1000000f, planet_jupiterImage, planet_jupiter_shadowImage));
         planetString += String.format("%.1e", pmass) + " "
@@ -203,10 +203,10 @@ public class GameScreen implements Screen {
         // batch draw everything
 
         gameWorld.shapeRenderer.setProjectionMatrix(camera.combined);
-        gameWorld.renderGrid(game.batch);
+
 
         game.batch.begin();
-
+        gameWorld.renderGrid(game.batch);
         //game.batch.setShader(grid_shader);
         //game.batch.draw(bg,bg.getX(),bg.getY(),bg.getWidth(),bg.getHeight());
         //font.draw(batch, probeString, 10, screenHeight-10);

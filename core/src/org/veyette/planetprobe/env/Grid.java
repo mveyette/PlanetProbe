@@ -2,6 +2,9 @@ package org.veyette.planetprobe.env;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
@@ -14,29 +17,32 @@ import org.veyette.planetprobe.actors.Star;
 import org.veyette.planetprobe.helper.GlbFuncs;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 /**
  * Created by Sparky on 9/11/2016.
  */
 public class Grid {
 
-    SpringPoint[][] points;
-    SpringPoint[] linear_points;
+    Hashtable<Integer,SpringPoint> points;
     int cols;
     int rows;
     float stiff_val;
     World_env gameWorld;
+    Sprite point_sprite;
 
     public Grid(int width, int height, int spacingX, int spacingY, float stiffness, World_env worldRef){
         int numColumns = (int)(width/spacingX)+1;
         int numRows = (int)(height/spacingY)+1;
+
         gameWorld = worldRef;
         stiff_val = stiffness;
-        points = new SpringPoint[numRows][numColumns];
+
+        points = new Hashtable<Integer,SpringPoint>();
 
         cols = numColumns;
         rows = numRows;
-
+        point_sprite = new Sprite(createBgTexture());
         int column = 0, row = 0;
         int count = 0;
 
@@ -45,8 +51,7 @@ public class Grid {
             for (int x = 0; x <= width; x += spacingX)
             {
                 float invmass = 1f;
-                points[row][column] = new SpringPoint(new Vector2(x, y), new Vector2(x, y), stiffness, invmass, count);
-
+                points.put(count,new SpringPoint(new Vector2(x, y), new Vector2(x, y), stiffness, invmass, count) );
                 column++;
                 count++;
             }
@@ -54,72 +59,81 @@ public class Grid {
             column = 0;
         }
 
-        linear_points = unravel(points);
-
     }
 
+    public static Texture createBgTexture()
+    {
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA4444); // or RGBA8888
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        Texture texture = new Texture(pixmap); // must be manually disposed
+        pixmap.dispose();
 
-    public SpringPoint[] unravel(SpringPoint[][] array) {
-        int r = array.length;
-        if (r == 0) {
-            return new SpringPoint[0]; // Special case: zero-length array
-        }
-        int c = array[0].length;
-        SpringPoint[] result = new SpringPoint[r * c];
-        int index = 0;
-        for (int i = 0; i < r; i++) {
-            for (int j = 0; j < c; j++) {
-                result[index] = array[i][j];
-                index++;
-            }
-        }
-        return result;
+        return texture;
     }
-
 
     public Vector2 calculate_accel_body(Mass p, Vector2 position){
         Vector2 norm = new Vector2(p.position.x-position.x, p.position.y - position.y);
         float len = norm.len();
         float Gfactor = 30000.0f;
 
-
         if(len != 0 ) {
             norm = norm.nor();
-
-            float dist = position.dst(p.position);
-
-            //System.out.println(new Vector2(norm.x * (p.mass)/(dist), norm.y * (p.mass)/(dist)).toString());
-            return new Vector2(norm.x * (p.mass*Gfactor)/(dist * dist), norm.y * (p.mass*Gfactor)/(dist * dist));
+            float dist = position.dst2(p.position);
+            return new Vector2(norm.x * (p.mass*Gfactor)/(dist), norm.y * (p.mass*Gfactor)/(dist));
         }
-
-
         return Vector2.Zero;
     }
 
-
-
     public void update(float delta){
 
-        for(int i = 0; i < linear_points.length; i++) {
+        for(int i = 0; i < points.size(); i++) {
+            SpringPoint sp = points.get(i);
 
-                for (Star star : gameWorld.starList()) {
-                    Vector2 paccel = calculate_accel_body(star, linear_points[i].position);
-                    linear_points[i].applyForce(paccel);
-                }
+            for (Star star : gameWorld.starList()) {
+                Vector2 paccel = calculate_accel_body(star, sp.position);
+                sp.applyForce(paccel);
+            }
 
             for (Planet pl : gameWorld.planetList()) {
-                Vector2 paccel = calculate_accel_body(pl, linear_points[i].position);
-                linear_points[i].applyForce(paccel);
+                Vector2 paccel = calculate_accel_body(pl, sp.position);
+                sp.applyForce(paccel);
             }
 
-                linear_points[i].update(delta);
-            }
+            sp.update(delta);
+        }
+
+    }
+
+    public Color calculatePointColor(float extendLength, float bp1, float bp2, float bp3, float a){
+        float r = 0.0f;
+        float g = 0.0f;
+        float b = 0.0f;
 
 
+
+        if(extendLength < bp1){
+            b = .5f + extendLength/bp1;
+        }
+
+        else if(extendLength < bp2){
+            g = .2f + (extendLength - bp1)/bp2;
+            b = 1.0f - (extendLength - bp1)/(bp2 - bp1);
         }
 
 
+        else if(extendLength >= bp2){
+            g = 1.0f - (extendLength - (bp2))/(bp3 - bp2);
 
+            if(g <0){
+                g = 0;
+            }
+            r = .3f + ((extendLength - (bp2)))/(bp3 - bp2);
+           // System.out.println(r);
+        }
+
+        return new Color(r,g,b,a);
+    }
 
     public void render(SpriteBatch sb)
     {
@@ -128,32 +142,26 @@ public class Grid {
         int height = rows;
         int linewidth = 1;
 
-        Matrix4 projection = gameWorld.shapeRenderer.getProjectionMatrix();
+       // Matrix4 projection = gameWorld.shapeRenderer.getProjectionMatrix();
 
-        Gdx.gl.glLineWidth(7);
+      //  Gdx.gl.glLineWidth(7);
 
-        GlbFuncs.debugRenderer.setProjectionMatrix(projection);
-        GlbFuncs.debugRenderer.begin(ShapeRenderer.ShapeType.Filled);
+       // GlbFuncs.debugRenderer.setProjectionMatrix(projection);
+       // GlbFuncs.debugRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
 
-
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++) {
-                Vector2 p = points[y][x].position;
-                Vector2 pi = points[y][x].init_position;
-                Color col =  new Color((float)points[y][x].getLength()/10.0f,.15f,.15f,.5f);
-                //GlbFuncs.DrawDebugSpot(pi, Color.BLACK, projection);
-                if(!points[y][x].is_asleep) {
-                    GlbFuncs.debugRenderer.setColor(col);
-                    GlbFuncs.debugRenderer.circle(p.x, p.y, 1);
-                 //   GlbFuncs.DrawDebugSpot(p, col, projection);
-                }
-
-            }
+        for(int i = 0; i < points.size(); i++) {
+            SpringPoint sp = points.get(i);
+            float len = sp.getLength();
+            Color col =  calculatePointColor(len, .05f, .3f, 1f, .01f);
+            point_sprite.setPosition(sp.position.x, sp.position.y);
+            point_sprite.draw(sb);
+               // GlbFuncs.debugRenderer.setColor(col);
+                //GlbFuncs.debugRenderer.line(sp.position.x, sp.position.y,0, sp.position.x+1, sp.position.y+1, 0);
         }
-        GlbFuncs.debugRenderer.end();
-        Gdx.gl.glLineWidth(1);
+
+       // GlbFuncs.debugRenderer.end();
+       // Gdx.gl.glLineWidth(1);
 
 
 
