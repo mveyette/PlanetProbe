@@ -63,7 +63,7 @@ public class Grid {
 
     public static Texture createBgTexture()
     {
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA4444); // or RGBA8888
+        Pixmap pixmap = new Pixmap(2, 2, Pixmap.Format.RGBA4444); // or RGBA8888
         pixmap.setColor(Color.WHITE);
         pixmap.fill();
         Texture texture = new Texture(pixmap); // must be manually disposed
@@ -153,7 +153,8 @@ public class Grid {
         for(int i = 0; i < points.size(); i++) {
             SpringPoint sp = points.get(i);
             float len = sp.getLength();
-            Color col =  calculatePointColor(len, .05f, .3f, 1f, .01f);
+            Color col =  calculatePointColor(len, .05f, .3f, 1f, 1f);
+            point_sprite.setColor(col);
             point_sprite.setPosition(sp.position.x, sp.position.y);
             point_sprite.draw(sb);
                // GlbFuncs.debugRenderer.setColor(col);

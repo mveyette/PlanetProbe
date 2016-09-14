@@ -189,7 +189,7 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         fpslogger.log();
         // set background color and clear
-        Gdx.gl.glClearColor(225f/255f, 225f/255f, 255f/255f, 1f);
+        Gdx.gl.glClearColor(0, 0, 0, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // time difference
@@ -207,10 +207,8 @@ public class GameScreen implements Screen {
 
         game.batch.begin();
         gameWorld.renderGrid(game.batch);
-        //game.batch.setShader(grid_shader);
-        //game.batch.draw(bg,bg.getX(),bg.getY(),bg.getWidth(),bg.getHeight());
-        //font.draw(batch, probeString, 10, screenHeight-10);
-        game.batch.setShader(null);
+
+
         game.font.draw(game.batch, planetString, game.screenWidth-100, game.screenHeight-10, 100, Align.left, false);
         game.bigfont.draw(game.batch, "DEMO", 5, game.screenHeight-10);
 
