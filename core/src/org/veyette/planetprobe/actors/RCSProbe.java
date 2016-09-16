@@ -14,44 +14,47 @@ import java.util.Iterator;
 /**
  * Created by Sparky on 9/11/2016.
  */
-public class Probe{
-    public Sprite sprite;
-    public Vector2 position;
-    public Vector2 velocity;
-    protected World_env worldRef;
-    boolean alive;
+public class RCSProbe extends Probe{
+    public Vector2 accel;
+    public boolean thrusting = false;
+    public float thrust_amt = 1;
 
-    public Probe(Texture texture, Vector2 iposition, Vector2 ivelocity, World_env worldReference){
-        sprite = new Sprite(texture);
-        worldRef = worldReference;
-        alive = true;
-        position = iposition;
-        velocity = ivelocity;
-        sprite.setPosition(position.x, position.y);
-        sprite.setRotation(getAngle());
+
+    public RCSProbe(Texture texture, Vector2 iposition, Vector2 ivelocity, World_env worldReference){
+        super(texture,  iposition,  ivelocity,  worldReference);
+        this.accel = Vector2.Zero;
+    }
+
+    public void applyThrust(float amt, float delta){
+        float ang = getAngle();
+
+        float cosAng = (float) Math.cos(Math.toRadians(ang));
+        float sinAng = (float) Math.sin(Math.toRadians(ang));
+        this.accel = new Vector2(this.accel.x+-sinAng * amt * delta, this.accel.y + cosAng * amt * delta);
+        System.out.println(accel.toString());
+
     }
 
 
-
-    public float getAngle(){
-        if (velocity.y > 0) {
-            return -1f * (float) Math.toDegrees(Math.atan(velocity.x / velocity.y));
-        } else {
-            return (-1f * (float) Math.toDegrees(Math.atan(velocity.x / velocity.y)) + 180f) % 360f;
+    public void set_thrust(float amt){
+        thrusting = true;
+        thrust_amt = amt;
+        if(amt == 0){
+            thrusting = false;
         }
+
     }
 
-    public boolean checkAlive(){
-        return alive;
-    }
-
-    public void render(SpriteBatch sb){
-        sprite.draw(sb);
-    }
 
 
     public void update(float delta) {
-        Vector2 accel = new Vector2(0, 0);
+         accel = new Vector2(0, 0);
+
+    if(thrusting) {
+        System.out.println("Applying thrust");
+        applyThrust(thrust_amt, delta);
+    }
+
 
         for (Star star : worldRef.starList()) {
             accel.add(star.getAccelerationWorld(position));
@@ -67,12 +70,12 @@ public class Probe{
 
         velocity.x = velocity.x;
         velocity.y = velocity.y;
-
-        float cosAng = (float) Math.cos(Math.toRadians(getAngle()));
-        float sinAng = (float) Math.sin(Math.toRadians(getAngle()));
+        float ang = getAngle();
+        float cosAng = (float) Math.cos(Math.toRadians(ang));
+        float sinAng = (float) Math.sin(Math.toRadians(ang));
 
         float vel = velocity.len();
-        advance(-1f * sinAng * vel * delta, cosAng * vel * delta);
+        advance(velocity.x*delta, velocity.y * delta);
 
         // remove the probe if it leaves the screen
         if (sprite.getY() > worldRef.gameRef.screenHeight || sprite.getY() < 0f || sprite.getX() > worldRef.gameRef.screenWidth || sprite.getX() < 0)
@@ -94,11 +97,6 @@ public class Probe{
         }
     }
 
-    public void advance(float dx, float dy){
-        position.x += dx;
-        position.y += dy;
-        sprite.setPosition(position.x, position.y);
-        sprite.setRotation(getAngle());
-    }
+
 
 }

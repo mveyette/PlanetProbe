@@ -117,7 +117,7 @@ public class Grid {
         }
 
         else if(extendLength < bp2){
-            g = .2f + (extendLength - bp1)/bp2;
+            g = .5f + (extendLength - bp1)/bp2;
             b = 1.0f - (extendLength - bp1)/(bp2 - bp1);
         }
 
@@ -128,7 +128,7 @@ public class Grid {
             if(g <0){
                 g = 0;
             }
-            r = .3f + ((extendLength - (bp2)))/(bp3 - bp2);
+            r = .5f + ((extendLength - (bp2)))/(bp3 - bp2);
            // System.out.println(r);
         }
 
@@ -153,7 +153,7 @@ public class Grid {
         for(int i = 0; i < points.size(); i++) {
             SpringPoint sp = points.get(i);
             float len = sp.getLength();
-            Color col =  calculatePointColor(len, .05f, .3f, 1f, 1f);
+            Color col =  calculatePointColor(len, .001f, .3f, 1f, 1f);
             point_sprite.setColor(col);
             point_sprite.setPosition(sp.position.x, sp.position.y);
             point_sprite.draw(sb);

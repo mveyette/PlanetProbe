@@ -2,6 +2,7 @@ package org.veyette.planetprobe.helper;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
@@ -46,6 +47,9 @@ public class GlbFuncs {
         return ptime * p2wTime;
     }
 
+    private static String vertexShader = Gdx.files.internal("outlinevertex.glsl").readString();
+    private static String fragmentShader = Gdx.files.internal("outlinefragment.glsl").readString();
+    public static ShaderProgram atmosphere_shader = new ShaderProgram(vertexShader,fragmentShader);
 
     public static Vector2 convert_p2wAccel(Vector2 paccel) {
         return paccel.scl(p2wDist / (float) Math.pow(p2wTime, 2));
