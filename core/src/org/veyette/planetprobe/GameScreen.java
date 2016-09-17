@@ -275,7 +275,7 @@ return true;
     public void render(float delta) {
        // fpslogger.log();
         // set background color and clear
-        Gdx.gl.glClearColor(0, 0, 0, 1f);
+        Gdx.gl.glClearColor(0.5f, 0.7f, 1f, 1f);
         //controller.update();
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
