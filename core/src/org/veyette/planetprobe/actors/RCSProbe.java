@@ -30,8 +30,8 @@ public class RCSProbe extends Probe{
 
         float cosAng = (float) Math.cos(Math.toRadians(ang));
         float sinAng = (float) Math.sin(Math.toRadians(ang));
-        this.accel = new Vector2(this.accel.x+-sinAng * amt * delta, this.accel.y + cosAng * amt * delta);
-        System.out.println(accel.toString());
+        this.accel = new Vector2(this.accel.x+ -sinAng * amt * delta, this.accel.y + cosAng * amt * delta);
+
 
     }
 
@@ -39,6 +39,8 @@ public class RCSProbe extends Probe{
     public void set_thrust(float amt){
         thrusting = true;
         thrust_amt = amt;
+
+        System.out.println(amt);
         if(amt == 0){
             thrusting = false;
         }

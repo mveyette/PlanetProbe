@@ -100,9 +100,8 @@ public class GameScreen implements Screen {
             if(probe != null) {
                 probe.set_thrust(0);
             }
-return true;
 
-
+            return true;
         }
 
 
@@ -133,11 +132,26 @@ return true;
 
 
         public boolean pan (float x, float y, float deltaX, float deltaY) {
-            float dY = initalY - y;
+            float dY = (float) Math.pow(initalY - y, 2f);
+            float max_thrust = 75;
+
+            if(dY > 10000){
+
+                dY = 10000;
+            }
+
+
 
            // System.out.println("thrust = " + dY);
             if(probe != null) {
-                probe.set_thrust(dY*5);
+                if(initalY - y < 0){
+                    probe.set_thrust(-dY);
+
+                }
+                else{
+                    probe.set_thrust(dY);
+                }
+
             }
 
 
@@ -238,6 +252,8 @@ return true;
         float psemiMajorAxis = .25f;//(float) (Math.random() * (0.25f - 0.01f)) + 0.01f;
 
         gameWorld.add_planet(new Planet(pmass, star.mass, new Vector2(star.position.x, star.position.y), psemiMajorAxis, 8, 1000000f, planet_jupiterImage, planet_jupiter_shadowImage));
+
+        gameWorld.add_planet(new Planet(pmass*9.5f, star.mass, new Vector2(star.position.x, star.position.y), psemiMajorAxis*.75f, 8, 700000f, planet_jupiterImage, planet_jupiter_shadowImage));
         planetString += String.format("%.1e", pmass) + " "
                 + String.format("%.2f", psemiMajorAxis) + " "
                 + "8" + "\n";
