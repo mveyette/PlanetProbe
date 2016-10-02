@@ -132,12 +132,12 @@ public class GameScreen implements Screen {
 
 
         public boolean pan (float x, float y, float deltaX, float deltaY) {
-            float dY = (float) Math.pow(initalY - y, 2f);
-            float max_thrust = 75;
+            float dY = (float) 10*Math.abs(initalY - y);
+            float max_thrust = 10000;
 
-            if(dY > 10000){
+            if(dY > max_thrust){
 
-                dY = 10000;
+                dY = max_thrust;
             }
 
 
@@ -291,7 +291,8 @@ public class GameScreen implements Screen {
     public void render(float delta) {
        // fpslogger.log();
         // set background color and clear
-        Gdx.gl.glClearColor(0.5f, 0.7f, 1f, 1f);
+       // Gdx.gl.glClearColor(0.5f, 0.7f, 1f, 1f);
+        Gdx.gl.glClearColor(0.01f, 0.01f, .01f, 1f);
         //controller.update();
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 

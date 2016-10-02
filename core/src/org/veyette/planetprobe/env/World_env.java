@@ -32,7 +32,7 @@ public class World_env {
         planets = new ArrayList<Planet>();
         stars = new ArrayList<Star>();
         shapeRenderer = new ShapeRenderer();
-        bg_grid = new Grid(gameRef.screenWidth, gameRef.screenHeight, gameRef.screenWidth/22, gameRef.screenHeight/32, 6f, this);
+        bg_grid = new Grid(gameRef.screenWidth, gameRef.screenHeight, gameRef.screenWidth/23, gameRef.screenHeight/32, 8f, this);
 
     }
 

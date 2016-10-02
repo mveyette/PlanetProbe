@@ -25,22 +25,24 @@ public class SpringPoint {
     public int id;
     public boolean is_asleep;
     public float length;
+    public float max_length;
 
 
     public SpringPoint(){
         accel = new Vector2(0,0);
-        damping = .80f;
+        damping = .60f;
         position = new Vector2(0,0);
         anchor = new Vector2(0,0);
         velocity = new Vector2(0,0);
         inverseMass = 0;
         is_asleep= false;
         length = 0;
+        max_length = 600;
     }
 
     public SpringPoint(Vector2 pos, Vector2 anch, float stiff_val, float invMass, int ID){
         accel = new Vector2(0,0);
-        damping = .80f;
+        damping = .60f;
         id = ID;
         stiffness = stiff_val;
         position = pos;
@@ -50,6 +52,7 @@ public class SpringPoint {
         inverseMass = invMass;
         is_asleep= false;
         length = 0;
+        max_length = 600;
     }
 
 
@@ -72,6 +75,9 @@ public class SpringPoint {
         if(lensq != 0) {
             norm = new Vector2(norm.x / lensq, norm.y / lensq);
             float dist = position.dst2(anchor)*stiffness;
+            if(dist > max_length){
+                applyForce(new Vector2(norm.x*-dist*dist, norm.y*-dist*dist));
+            }
             applyForce(new Vector2(norm.x*-dist, norm.y*-dist));
         }
     }

@@ -63,7 +63,7 @@ public class Grid {
 
     public static Texture createBgTexture()
     {
-        Pixmap pixmap = new Pixmap(2, 2, Pixmap.Format.RGBA4444); // or RGBA8888
+        Pixmap pixmap = new Pixmap(3, 3, Pixmap.Format.RGBA4444); // or RGBA8888
         pixmap.setColor(Color.WHITE);
         pixmap.fill();
         Texture texture = new Texture(pixmap); // must be manually disposed
@@ -110,6 +110,7 @@ public class Grid {
         float g = 0.0f;
         float b = 0.0f;
 
+        float alpha = .6f + ((float)extendLength/(float)bp3 - .3f);
 
 
         if(extendLength < bp1){
@@ -117,7 +118,7 @@ public class Grid {
         }
 
         else if(extendLength < bp2){
-            g = .5f + (extendLength - bp1)/bp2;
+            g = .2f + (extendLength - bp1)/bp2;
             b = 1.0f - (extendLength - bp1)/(bp2 - bp1);
         }
 
@@ -132,7 +133,7 @@ public class Grid {
            // System.out.println(r);
         }
 
-        return new Color(r,g,b,a);
+        return new Color(r,g,b,alpha);
     }
 
     public void render(SpriteBatch sb)
@@ -153,7 +154,7 @@ public class Grid {
         for(int i = 0; i < points.size(); i++) {
             SpringPoint sp = points.get(i);
             float len = sp.getLength();
-            Color col =  calculatePointColor(len, .001f, .3f, 1f, 1f);
+            Color col =  calculatePointColor(len, .001f, .3f, 1f, .6f);
             point_sprite.setColor(col);
             point_sprite.setPosition(sp.position.x, sp.position.y);
             point_sprite.draw(sb);
