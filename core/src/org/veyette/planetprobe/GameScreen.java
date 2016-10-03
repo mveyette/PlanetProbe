@@ -26,6 +26,7 @@ import org.veyette.planetprobe.actors.Probe;
 import org.veyette.planetprobe.actors.RCSProbe;
 import org.veyette.planetprobe.actors.Star;
 import org.veyette.planetprobe.env.World_env;
+import org.veyette.planetprobe.helper.guiSlideBar;
 
 public class GameScreen implements Screen {
     final PlanetProbe game;
@@ -60,7 +61,7 @@ public class GameScreen implements Screen {
     private Vector3 touchPos = new Vector3();
     private Vector3 releasePos = new Vector3();
     private Vector3 launchVector = new Vector3();
-
+    guiSlideBar thrustBar;
     private float probeLaunchTouchScale;
     private float shipRotation = 0f;
     private float maxLaunchSpeed = 80f;
@@ -81,11 +82,12 @@ public class GameScreen implements Screen {
 
         float initalScale = 1;
         float initalY = 0;
-
+        float initalX = 0;
 
         public boolean touchDown (float x, float y, int pointer, int button) {
             // your touch down code here
             initalY = y;
+            initalX = x;
             return true; // return true to indicate the event was handled
         }
 
@@ -132,9 +134,13 @@ public class GameScreen implements Screen {
 
 
         public boolean pan (float x, float y, float deltaX, float deltaY) {
-            float dY = (float) 10*Math.abs(initalY - y);
-            float max_thrust = 10000;
-
+            System.out.println( "pan at " + x + ", " + y);
+            float dY = (float) 12*Math.abs(initalY - y);
+            float max_thrust = 4000;
+            thrustBar.show(true);
+            thrustBar.maxVal = max_thrust;
+            Vector3 pos = camera.unproject(new Vector3(Gdx.input.getX(),Gdx.input.getY(),0));
+            thrustBar.setPos(pos.x, pos.y);
             if(dY > max_thrust){
 
                 dY = max_thrust;
@@ -146,10 +152,11 @@ public class GameScreen implements Screen {
             if(probe != null) {
                 if(initalY - y < 0){
                     probe.set_thrust(-dY);
-
+                    thrustBar.setDeltaY(-dY);
                 }
                 else{
                     probe.set_thrust(dY);
+                    thrustBar.setDeltaY(dY);
                 }
 
             }
@@ -164,6 +171,7 @@ public class GameScreen implements Screen {
             if(probe != null) {
                 probe.set_thrust(0);
             }
+            thrustBar.show(false);
             return true;
         }
 
@@ -204,6 +212,8 @@ public class GameScreen implements Screen {
         shipHeight = 32;
         shipY = 32;
         shipX = game.screenWidth / 2 - shipWidth / 2;
+        thrustBar = new guiSlideBar(0,0,0,0);
+
 
 
         controller = new GameGestureController();
@@ -311,7 +321,10 @@ public class GameScreen implements Screen {
         //game.bigfont.draw(game.batch, "DEMO", 5, game.screenHeight-10);
 
         gameWorld.render(game.batch);
+        thrustBar.render(game.batch);
         ship.draw(game.batch);
+
+
         game.batch.end();
 
 
