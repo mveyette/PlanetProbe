@@ -278,7 +278,7 @@ public class GameScreen implements Screen {
         Vector2 position = new Vector2(shipX + shipWidth/2 - probeImage.getWidth()/2, shipY+shipHeight/2 - probeImage.getHeight()/2);
         Vector2 velocity = new Vector2(-1f * (float) Math.sin(Math.toRadians(launchAngle)) * launchSpeed,
                 (float) Math.cos(Math.toRadians(launchAngle)) * launchSpeed);
-        probe = new RCSProbe(probeImage, position, velocity, gameWorld);
+        probe = new RCSProbe(probeImage, position, velocity, gameWorld, 2f);
         gameWorld.add_probe(probe);
     }
 

@@ -18,11 +18,13 @@ public class RCSProbe extends Probe{
     public Vector2 accel;
     public boolean thrusting = false;
     public float thrust_amt = 1;
+    float mass;
 
 
-    public RCSProbe(Texture texture, Vector2 iposition, Vector2 ivelocity, World_env worldReference){
+    public RCSProbe(Texture texture, Vector2 iposition, Vector2 ivelocity, World_env worldReference, float pmass){
         super(texture,  iposition,  ivelocity,  worldReference);
         this.accel = Vector2.Zero;
+        mass = pmass;
     }
 
     public void applyThrust(float amt, float delta){
@@ -67,8 +69,10 @@ public class RCSProbe extends Probe{
         }
 
 
-        velocity.x += accel.x * delta;
-        velocity.y += accel.y * delta;
+        velocity.x += accel.x * mass * delta;
+        velocity.y += accel.y * mass * delta;
+
+
 
         velocity.x = velocity.x;
         velocity.y = velocity.y;
