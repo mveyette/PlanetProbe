@@ -21,12 +21,12 @@ public class Planet extends Mass{
     public float rotationalAngle;
     public boolean probed;
     public Vector2 star_pos;
-
+    private int science_value;
     private float distanceMoved;
     private float angle;
 
 
-    public Planet(float imass, float starmass, Vector2 star_position, float isemiMajorAxis, int ipxradius, float irotationalPeriod, Texture planetImage, Texture shadowImage){
+    public Planet(float imass, float starmass, Vector2 star_position, float isemiMajorAxis, int ipxradius, float irotationalPeriod, Texture planetImage, Texture shadowImage, int sci_val){
         super(imass);
         star_pos = star_position;
         probed = false;
@@ -43,11 +43,17 @@ public class Planet extends Mass{
         shadowSprite = new Sprite(shadowImage);
         rotationalAngle = 0f;
         update(0f);
+        science_value = sci_val;
     }
 
     public void render(SpriteBatch sb){
             planetSprite.draw(sb);
             shadowSprite.draw(sb);
+    }
+
+    public int getScience_value(){
+
+        return science_value;
     }
 
 

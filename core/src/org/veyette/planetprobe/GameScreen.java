@@ -26,6 +26,7 @@ import org.veyette.planetprobe.actors.Probe;
 import org.veyette.planetprobe.actors.RCSProbe;
 import org.veyette.planetprobe.actors.Star;
 import org.veyette.planetprobe.env.World_env;
+import org.veyette.planetprobe.helper.Player;
 import org.veyette.planetprobe.helper.guiSlideBar;
 
 public class GameScreen implements Screen {
@@ -61,6 +62,9 @@ public class GameScreen implements Screen {
     private Vector3 touchPos = new Vector3();
     private Vector3 releasePos = new Vector3();
     private Vector3 launchVector = new Vector3();
+
+
+
     guiSlideBar thrustBar;
     private float probeLaunchTouchScale;
     private float shipRotation = 0f;
@@ -76,13 +80,17 @@ public class GameScreen implements Screen {
     RCSProbe probe;
     FPSLogger fpslogger;
     GestureDetector gestureDetector;
-    GestureDetector.GestureListener controller;
+    GameGestureController controller;
+
+    private Player local_player;
 
     class GameGestureController implements GestureDetector.GestureListener {
 
         float initalScale = 1;
         float initalY = 0;
         float initalX = 0;
+        boolean has_tapped = false;
+        float has_tapped_cooldown = .5f;
 
         public boolean touchDown (float x, float y, int pointer, int button) {
             // your touch down code here
@@ -109,13 +117,21 @@ public class GameScreen implements Screen {
 
         public boolean tap (float x, float y, int count, int button) {
             Gdx.app.log("GestureDetectorTest", "tap at " + x + ", " + y + ", count: " + count);
-            releasePos.set((int)x, (int)y, 0);
-            camera.unproject(releasePos);
+            if(has_tapped) {
+                releasePos.set((int) x, (int) y, 0);
+                camera.unproject(releasePos);
 
-            float launchAngle = -1f * (float) Math.toDegrees(Math.atan((releasePos.x - game.screenWidth / 2) / (releasePos.y - shipY - shipHeight / 2)));
-            float launchSpeed = maxLaunchSpeed;
+                float launchAngle = -1f * (float) Math.toDegrees(Math.atan((releasePos.x - game.screenWidth / 2) / (releasePos.y - shipY - shipHeight / 2)));
+                float launchSpeed = maxLaunchSpeed;
 
-            spawnProbe(launchAngle, launchSpeed);
+                spawnProbe(launchAngle, launchSpeed);
+            }
+
+            else{
+                    has_tapped = true;
+            }
+
+
             return true; // return true to indicate the event was handled
         }
 
@@ -187,8 +203,18 @@ public class GameScreen implements Screen {
             return false;
         }
 
-        public void update () {
+        public void update (float delta) {
+            if(has_tapped) {
+                has_tapped_cooldown -= delta;
+                System.out.println(has_tapped_cooldown);
+                System.out.println(has_tapped);
+            }
 
+
+            if(has_tapped_cooldown <= 0){
+                has_tapped_cooldown = .5f;
+                has_tapped = false;
+            }
         }
 
 
@@ -206,6 +232,7 @@ public class GameScreen implements Screen {
         this.game = gam;
         gameWorld = new World_env(gam);
         shapeRenderer = new ShapeRenderer();
+        local_player = new Player("Test_player"); //TODO: add loading character from sql
         // some helpful display variable
         screenAspectRatio = 1f*game.screenHeight / game.screenWidth; // not used yet
         shipWidth = 32;
@@ -232,7 +259,7 @@ public class GameScreen implements Screen {
 
         // create all our image textures
         shipImage = new Texture(Gdx.files.internal("ship.png"));
-        probeImage = new Texture(Gdx.files.internal("probe.png"));
+        probeImage = new Texture(Gdx.files.internal("probe2.png"));
         starImage = new Texture(Gdx.files.internal("star.png"));
         planet_jupiterImage = new Texture(Gdx.files.internal("planet_jupiter.png"));
         planet_jupiter_shadowImage = new Texture(Gdx.files.internal("planet_jupiter_shadow.png"));
@@ -261,9 +288,9 @@ public class GameScreen implements Screen {
         float pmass = .02f;//(float) Math.pow(10,((Math.random() * (-2 - -6)) + -4.1));
         float psemiMajorAxis = .25f;//(float) (Math.random() * (0.25f - 0.01f)) + 0.01f;
 
-        gameWorld.add_planet(new Planet(pmass, star.mass, new Vector2(star.position.x, star.position.y), psemiMajorAxis, 8, 1000000f, planet_jupiterImage, planet_jupiter_shadowImage));
+        gameWorld.add_planet(new Planet(pmass, star.mass, new Vector2(star.position.x, star.position.y), psemiMajorAxis, 8, 1000000f, planet_jupiterImage, planet_jupiter_shadowImage, 100));
 
-        gameWorld.add_planet(new Planet(pmass*9.5f, star.mass, new Vector2(star.position.x, star.position.y), psemiMajorAxis*.75f, 8, 700000f, planet_jupiterImage, planet_jupiter_shadowImage));
+        gameWorld.add_planet(new Planet(pmass*9.5f, star.mass, new Vector2(star.position.x, star.position.y), psemiMajorAxis*.75f, 8, 700000f, planet_jupiterImage, planet_jupiter_shadowImage, 100));
         planetString += String.format("%.1e", pmass) + " "
                 + String.format("%.2f", psemiMajorAxis) + " "
                 + "8" + "\n";
@@ -278,35 +305,19 @@ public class GameScreen implements Screen {
         Vector2 position = new Vector2(shipX + shipWidth/2 - probeImage.getWidth()/2, shipY+shipHeight/2 - probeImage.getHeight()/2);
         Vector2 velocity = new Vector2(-1f * (float) Math.sin(Math.toRadians(launchAngle)) * launchSpeed,
                 (float) Math.cos(Math.toRadians(launchAngle)) * launchSpeed);
-        probe = new RCSProbe(probeImage, position, velocity, gameWorld, 2f);
+        probe = new RCSProbe(probeImage, position, velocity, gameWorld, 1.5f, local_player);
         gameWorld.add_probe(probe);
     }
 
-        /*
-    ####################################################
-    The render function, called at ~30-60 fps
-    to update game continuously.
-    ####################################################
-     */
-
-
-    public void handleInput() {
-    }
-
     public void update(float delta){
-        handleInput();
+        controller.update(delta);
     }
 
     @Override
     public void render(float delta) {
-       // fpslogger.log();
-        // set background color and clear
-       // Gdx.gl.glClearColor(0.5f, 0.7f, 1f, 1f);
         Gdx.gl.glClearColor(0.01f, 0.01f, .01f, 1f);
-        //controller.update();
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // time difference
         deltaTime = Gdx.graphics.getDeltaTime();
 
         game.batch.setProjectionMatrix(camera.combined);

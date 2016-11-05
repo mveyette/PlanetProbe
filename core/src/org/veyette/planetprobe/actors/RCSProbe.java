@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 import org.veyette.planetprobe.env.World_env;
+import org.veyette.planetprobe.helper.Player;
 
 import java.util.Iterator;
 
@@ -19,11 +20,13 @@ public class RCSProbe extends Probe{
     public boolean thrusting = false;
     public float thrust_amt = 1;
     float mass;
+    private Player probe_owner;
 
 
-    public RCSProbe(Texture texture, Vector2 iposition, Vector2 ivelocity, World_env worldReference, float pmass){
+    public RCSProbe(Texture texture, Vector2 iposition, Vector2 ivelocity, World_env worldReference, float pmass, Player owner){
         super(texture,  iposition,  ivelocity,  worldReference);
         this.accel = Vector2.Zero;
+        probe_owner = owner;
         mass = pmass;
     }
 
@@ -98,6 +101,7 @@ public class RCSProbe extends Probe{
             if (Intersector.overlaps(planet.circle, sprite.getBoundingRectangle())) {
                 alive = false;
                 planet.probed = true;
+                probe_owner.setCurrent_science_score(probe_owner.getCurrent_science_score() + planet.getScience_value());
             }
 
         }
